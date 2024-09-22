@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="/style/index.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Supabase</h1>
+  <div id="history"></div>
+  <input type="button" value="create" id="create_btn" />
+  <script>
+    const supabaseUrl = 'https://qmwgpwspubvrzhdejwxm.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtd2dwd3NwdWJ2cnpoZGVqd3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjY5MDI0ODksImV4cCI6MjA0MjQ3ODQ4OX0.354mQ4KgOi7KbhXV4pSkaiO4X_LFhXcQGDL1NFPJWo4';
+    const client= supabase.createClient(supabaseUrl, supabaseKey);
+    
+    async function refreshHistory() {
+      let { data: record, error } = await client.from('page').select('*');
+      console.log('record', record);
+      if (error) {
+        console.error('데이터 가져오기 오류:', error);
+        return;
+      }
+      let tag = "";
+      for (let i = 0; i < record.length; i++) {
+        tag += `<h2>${record[i].title}</h2>${record[i].body}`;
+      }
+      document.querySelector("#history").innerHTML = tag;
+    }
+    refreshHistory();
+    
+    async function recordHandler() {    
+      const { data, error } = await client
+      .from('page')
+      .insert([
+        { title: prompt('title?'), body: prompt('body?') },
+      ]).select()
+      refreshHistory();
+    }
+    document.querySelector("#create_btn")
+    .addEventListener("click", recordHandler);
+  </script>  
+</body>
+</html>

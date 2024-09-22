@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="/style/index.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Supabase</h1>
+  <input type="button" value="login " id="login" />
+  <input type="button" value="logout " id="logout" />
+  <input type="button" value="create" id ="create_btn" />
+  <div id="history"></div>
+  <script>
+    const supabaseUrl = 'https://qvceuxiwdjbyuqzywptl.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2Y2V1eGl3ZGpieXVxenl3cHRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjY5MTQyNDgsImV4cCI6MjA0MjQ5MDI0OH0.5OJcuS1-asZU4KUcM1v-31xYzfGlOnMfPzqoK3Xy86U';
+    const client= supabase.createClient(supabaseUrl, supabaseKey);
+    
+    //로그인
+    async function signInWithGithub() { //깃허브로 로그인
+      const { data, error } = await client.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: "https://organic-space-system-p4p5p67xqr6c6ww4-3000.app.github.dev/",
+        },
+      });
+    }
+    document.querySelector('#login').addEventListener("click", signInWithGithub);
+
+    //로그인 확인
+    async function checkLogin() { //로그인이 되어있으면 로그아웃으로 보이게, 안되어있으면 로그인으로 보이게 하는 함수
+      const authInfo = await client.auth.getSession();
+      const session = authInfo.data.session;
+      console.log("~file:index.html:35 ~ checkLogin ~ session:",session);
+      document.querySelector('#login').style.display = "none";
+      document.querySelector('#logout').style.display = "none";
+      if (session == null) {
+        document.querySelector('#login').style.display = "inline";
+      } else {
+        document.querySelector('#logout').style.display = "inline";
+      }
+    }
+    checkLogin();
+    async function signOut() {
+      const { error } = await client.auth.signOut()
+      checkLogin();
+    }
+    document.querySelector("#logout").addEventListener("click", signOut);
+
+    //글 새로고침
+    async function refreshHistory() {
+      let { data: record, error } = await client.from('page').select('*');
+      console.log('record', record);
+      if (error) {
+        console.error('데이터 가져오기 오류:', error);
+        return;
+      }
+      let tag = "";
+      for (let i = 0; i < record.length; i++) {
+        tag += `<div style="margin:20px 0">
+          <h2>${record[i].title}</h2>${record[i].body}
+          <p>
+            <input type="button" value="delete" onclick="deleteRecord(${record[id]})" />
+          </p>
+          </div>`;
+      }
+      document.querySelector("#history").innerHTML = tag;
+    }
+    refreshHistory();
+    
+    //글 쓰기
+    async function recordHandler() {    
+      const { data, error } = await client
+      .from('page')
+      .insert([
+        { title: prompt('title?'), body: prompt('body?') },
+      ]).select()
+      refreshHistory();
+    }
+    document.querySelector("#create_btn").addEventListener("click", recordHandler);
+
+    async function deleteRecord(id) {
+      const { data, error } = await client.from("page").delete().eq("id", id);
+      refreshHistory();
+    }
+  </script>  
+</body>
+</html>
+//29.7부터 다시하자 ㅠ 삭제부터 다시

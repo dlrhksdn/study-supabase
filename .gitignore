@@ -1,0 +1,11 @@
+# node_modules 디렉터리 무시
+node_modules/
+
+# 로그 파일 무시
+*.log
+
+# 환경 설정 파일 무시
+.env
+
+# 특정 디렉터리 내 모든 파일 무시
+temp/
